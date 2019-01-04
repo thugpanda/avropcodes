@@ -1,7 +1,9 @@
-byte    movCheck    =   0b00101100;
-byte    addCheck    =   0b00001100;
-byte    subCheck    =   0b00011000;
-byte    eorCheck    =   0b00100100;
+static  byte    movCheck    =   0b00101100;
+static  byte    addCheck    =   0b00001100;
+static  byte    subCheck    =   0b00011000;
+static  byte    eorCheck    =   0b00100100;
+static  byte    andCheck    =   0b00100000;
+static  byte    adcCheck    =   0b00011100;
 
 byte checkForMovInstruction(word __local) {
     byte    movCheck                =   0b00101100;
@@ -27,9 +29,13 @@ byte checkForInstruction(word __local) {
         return 2;
     } else if((__localInstructionPart^eorCheck) == 0) {
         return 3;
+    } else if((__localInstructionPart^andCheck) == 0) {
+        return 4;
+    } else if((__localInstructionPart^adcCheck) == 0) {
+        return 5;
     }
 
-    return 4;
+    return 6;
 }
 
 byte loadNextWord(word __pFlash) {
