@@ -8,8 +8,7 @@ static  byte    adcCheck    =   0b00011100;
 byte checkForMovInstruction(word __local) {
     byte    movCheck                =   0b00101100;
     byte    __localInstructionPart  =   __local>>8;
-            __localInstructionPart  &=  ~(1<<0);
-            __localInstructionPart  &=  ~(1<<1);
+            __localInstructionPart  &=  0b11111100;
 
     byte    returnInstruction       =   __localInstructionPart ^ movCheck;
 

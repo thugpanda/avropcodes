@@ -24,6 +24,7 @@ long    millisStart =   0;
 long    millisEnd   =   0;
 
 AccelStepper    stepper;
+AccelStepper    stepper2(4,7,8,12,13);
 
 void setup () {
     Serial.begin(115200);
@@ -35,11 +36,13 @@ void setup () {
     pinMode(YELLOW,OUTPUT);
     pinMode(LED_BUILTIN,OUTPUT);
 
-    stepper.setMaxSpeed(250);
-    stepper.setAcceleration(75);
+    stepper.setMaxSpeed(500);
+    stepper.setAcceleration(250);
+    stepper2.setMaxSpeed(500);
+    stepper2.setAcceleration(250);
 
     millisStart =   millis();
-    for(pFlash=0x0; pFlash<=0x20D8; pFlash++) {
+    for(pFlash=0x0; pFlash<=0x224C; pFlash++) {
         digitalWrite(GREEN,LOW);
         digitalWrite(RED,LOW);
         digitalWrite(BLUE,LOW);
@@ -109,6 +112,14 @@ void setup () {
                 Serial.print(pgm_word>>10,HEX);
                 Serial.print(" with payload 0x");
                 Serial.print((pgm_word&(~64512)),HEX);
+
+                Serial.print("\nMoving Stepper ADC from 0x");
+                Serial.print(stepper2.currentPosition(),HEX);
+                Serial.print(" to 0x");
+                Serial.print((pgm_word&(~64512)),HEX);
+                stepper2.runToNewPosition((pgm_word&(~64512)));
+                delay(100);
+
                 adcCount++;
                 break;
             default:
@@ -139,10 +150,10 @@ void loop() {
 }
 
 void moveStepper() {
-    Serial.print("\nMoving Stepper from ");
-    Serial.print(stepper.currentPosition());
-    Serial.print(" to ");
-    Serial.print((pgm_word&(~64512)));
+    Serial.print("\nMoving Stepper MOV from 0x");
+    Serial.print(stepper.currentPosition(),HEX);
+    Serial.print(" to 0x");
+    Serial.print((pgm_word&(~64512)),HEX);
     stepper.runToNewPosition((pgm_word&(~64512)));
     delay(100);
 }
