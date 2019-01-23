@@ -4,7 +4,7 @@
 #include <AccelStepper.h>
 
 #define pgm_read_word_near(address_short) __LPM_word((uint16_t)(address_short))
-#define pgm_read_byte_near(address_short) __LPM((unt16_t)(address_short))
+#define pgm_read_byte_near(address_short) __LPM((uint16_t)(address_short))
 #define GREEN 11
 #define RED 6
 #define BLUE 9
@@ -57,9 +57,9 @@ void setup () {
                 Serial.print(pgm_word>>10,HEX);
                 Serial.print(" with payload 0x");
                 Serial.print((pgm_word&(~64512)),HEX);
-                moveStepper();
+                // moveStepper();
                 movCount++;
-                digitalWrite(GREEN,HIGH);
+                // digitalWrite(GREEN,HIGH);
                 break;
             case(1):
                 pgm_word    =   pgm_read_word_near(pFlash);
@@ -70,7 +70,7 @@ void setup () {
                 Serial.print(" with payload 0x");
                 Serial.print((pgm_word&(~64512)),HEX);
                 addCount++;
-                digitalWrite(RED,HIGH);
+                // digitalWrite(RED,HIGH);
                 break;
             case(2):
                 pgm_word    =   pgm_read_word_near(pFlash);
@@ -81,7 +81,7 @@ void setup () {
                 Serial.print(" with payload 0x");
                 Serial.print((pgm_word&(~64512)),HEX);
                 subCount++;
-                digitalWrite(BLUE,HIGH);
+                // digitalWrite(BLUE,HIGH);
                 break;
             case(3):
                 pgm_word    =   pgm_read_word_near(pFlash);
@@ -92,7 +92,7 @@ void setup () {
                 Serial.print(" with payload 0x");
                 Serial.print((pgm_word&(~64512)),HEX);
                 eorCount++;
-                digitalWrite(YELLOW,HIGH);
+                // digitalWrite(YELLOW,HIGH);
                 break;
             case(4):
                 pgm_word    =   pgm_read_word_near(pFlash);
@@ -117,7 +117,7 @@ void setup () {
                 Serial.print(stepper2.currentPosition(),HEX);
                 Serial.print(" to 0x");
                 Serial.print((pgm_word&(~64512)),HEX);
-                stepper2.runToNewPosition((pgm_word&(~64512)));
+                // stepper2.runToNewPosition((pgm_word&(~64512)));
                 delay(100);
 
                 adcCount++;

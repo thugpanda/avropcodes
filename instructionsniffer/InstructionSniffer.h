@@ -10,12 +10,13 @@
 class InstructionSniffer {
     public:
                     InstructionSniffer(word __pgmLength);
+    word            catalogInstruction(word __pgmRead);
     word            findInstruction(word __pFlash);
     unsigned long   returnInstructionWord(byte __pos);
     // String          returnInstructionString(byte __pos);
 
     private:
-    void            initInstructionCodes();
+    // void            initInstructionCodes();
     word            pgmLength;
 
     byte    oneByteInstructions[40]   =   {

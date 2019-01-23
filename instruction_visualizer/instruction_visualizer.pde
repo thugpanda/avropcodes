@@ -48,11 +48,12 @@ void setup() {
                     fill(90,255,200);
                 } else if(opcodes[j*k] == 0x8008 | opcodes[j*k] == 0x9009 | opcodes[j*k] == 0x900A | opcodes[j*k] == 0x8000 | opcodes[j*k] == 0x9001 | opcodes[j*k] == 0x9002) {
                     //LDD1,LDD2,LDD3,LDD4,LDD5,LDD6,LDD7,LDD8
-                    fill(90,150,200);
+                    fill(90,150,225);
                 } else if(opcodes[j*k] == 224 | opcodes[j*k] == 160 | opcodes[j*k] == 36864) {
                     //LDI,LDS,LDS16
                     fill(90,150,120);
-                } else if(opcodes[j*k] == )
+                }
+                // } else if(opcodes[j*k] == )
                 rect(k*20, j*20, 20, 20);
             }
         }
