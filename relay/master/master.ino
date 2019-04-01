@@ -1,11 +1,14 @@
 #include <InstructionSniffer.h>
 #include <Wire.h>
 
-#define MASTERSPI 8
+#define MASTERSPI 32
 #define SLAVESPI 9
+#define NO_OF_SLAVES 4
 #define SPI true
 
 InstructionSniffer sniffer(SPI);
+
+byte    currentSlave    =   0;
 
 
 void setup() {
@@ -14,7 +17,12 @@ void setup() {
     Serial.println("Starting to sniff");
     Wire.begin();
     // Wire.onReceive(receiveHandler);
-    resetBus();
+//    resetBus();
+    for(byte i=0; i<NO_OF_SLAVES; i++) {
+        resetBus(i);
+        Serial.print("Reset Bus ");
+        Serial.println(i);
+    }
 
     DDRD    =   0xFC;
     DDRB    =   0x3F;
@@ -22,15 +30,22 @@ void setup() {
 }
 
 void loop() {
-    for(word pFlash = 0; pFlash < 0x8000; pFlash++) {
+    Serial.print("----------------\n----------------\nTalking to Slave #");
+    Serial.println(currentSlave);
+    for(word pFlash = 0; pFlash < 0x80; pFlash++) {
         word    slavePGM    =   0;
-        Wire.requestFrom(SLAVESPI, 2);
+//        Serial.println("Requesting...");
+        Wire.requestFrom(currentSlave, 2);
         while(Wire.available() == 2) {
+//          Serial.println("2b available");
             slavePGM        =   (Wire.read())<<0x8;
         }
         while(Wire.available() == 1) {
+//          Serial.println("1b available");
             slavePGM        |=  Wire.read();
         }
+        
+//          Serial.println("No available");
         word    instruction =   sniffer.OTFfindInstruction(slavePGM);
 
         if(instruction == 0x0) {
@@ -49,16 +64,25 @@ void loop() {
         PORTB               =   instruction>>6;
         PORTC               =   instruction>>12;
 
-        delay(250);
+        delay(100);
 
         PORTD               =   0x0;
         PORTB               =   0x0;
         PORTC               =   0x0;
     }
+    resetBus();
+    currentSlave++;
+    currentSlave    %=  NO_OF_SLAVES;
 }
 
 void resetBus() {
-    Wire.beginTransmission(SLAVESPI);
+    Wire.beginTransmission(currentSlave);
+    Wire.write(0x0);
+    Wire.endTransmission();
+}
+
+void resetBus(byte address) {
+    Wire.beginTransmission(address);
     Wire.write(0x0);
     Wire.endTransmission();
 }

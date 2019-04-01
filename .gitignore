@@ -6,8 +6,11 @@
 .png
 .pdf
 .tif
+.tiff
 .dxf
-.stl
+.dwg
+.ai
+
 .obj
 .gcode
 .java
