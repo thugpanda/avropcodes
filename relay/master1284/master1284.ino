@@ -4,7 +4,7 @@
 #define MASTERSPI 32
 #define NO_OF_SLAVES 16
 #define SPI true
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
  #define DEBUG_BEGIN(x) Serial.begin(x)
@@ -36,11 +36,13 @@ byte    tick            =   0;
 
 #define tFlash 7
 #define tWait 76
+#define BUFFERSIZE 32
 
 #define AUDIO_OUT 13    //PD5/19 as PWM out for sound
 #define OUTPUT_REG OCR1A
 
-uint8_t audioBuffer[24];
+uint8_t audioBuffer[BUFFERSIZE];
+uint8_t audioBufferWrite[BUFFERSIZE];
 uint8_t write           =   0;
 
 void setup() {
@@ -83,6 +85,14 @@ void loop() {
         // audioBuffer[0]  =   instruction;
         // audioBuffer[1]  =   (instruction>>8);
         shiftBuffer(byte(instruction), byte(instruction>>8));
+        // copyBuffer(audioBuffer, audioBufferWrite);
+        for(int i=0; i<32; i++) {
+            if(instruction & (1<<(i%2))) {
+                audioBufferWrite[i] = audioBuffer[i];
+            } else {
+                audioBufferWrite[i] =   0;
+            }
+        }
 
         DEBUG_PRINT(millis());
         DEBUG_PRINT(": Received from ");
@@ -99,7 +109,7 @@ void loop() {
 
         DEBUG_PRINT("Buffer::[\t");
         DEBUG_PRINT("[");
-        DEBUG_FOR(0,24,1) {
+        DEBUG_FOR(0,BUFFERSIZE,1) {
             DEBUG_PRINT(audioBuffer[i]);
             DEBUG_PRINT("\t");
         }
@@ -162,7 +172,10 @@ void setupTimerPWM() {
 
     TCCR1A  |=  (1 << COM1A1);
     TCCR1A  |=  (1 << WGM10) | (1 << WGM11);
-    TCCR1B  |=  (1 << WGM12) | (0 << CS12) | (1 << CS11) | (1 << CS10); //TODO - find best settings for sound
+    // TCCR1B  |=  (1 << WGM12) | (0 << CS12) | (1 << CS11) | (0 << CS10); //TODO - find best settings for sound
+    // TCCR1B  |=  (1 << WGM12) | (0 << CS12) | (1 << CS11) | (1 << CS10); //TODO - find best settings for sound
+    TCCR1B  |=  (1 << WGM12) | (1 << CS12) | (0 << CS11) | (0 << CS10); //TODO - find best settings for sound
+    // TCCR1B  |=  (1 << WGM12) | (1 << CS12) | (0 << CS11) | (1 << CS10); //TODO - find best settings for sound
 
     DEBUG_PRINT(millis());
     DEBUG_PRINTLN(": Set Timer1 as Fast PWM, output to OCR1A (PD4)");
@@ -172,9 +185,17 @@ void setupTimerPWM() {
 
 ISR(TIMER3_COMPA_vect) {
     //Interrupt for sampling
-    OUTPUT_REG  =   audioBuffer[write%24] | (tick>>4);  //TODO - modify formular for cool sound
+    // OUTPUT_REG  =   audioBuffer[write%24] | (tick>>4) + random(64,255);  //TODO - modify formular for cool sound
+    // OUTPUT_REG  =   audioBufferWrite[write%BUFFERSIZE] | (tick>>4);
+    OUTPUT_REG  =   audioBufferWrite[write%BUFFERSIZE];
     write++;
     tick++;
+}
+
+void copyBuffer(uint8_t bufferFrom[], uint8_t bufferTo[]) {
+    for(int i=0; i<BUFFERSIZE; i++) {
+        bufferTo[i] =   bufferFrom[i];
+    }
 }
 
 void resetBus(byte _n) {
@@ -188,10 +209,10 @@ void resetBus(byte _n) {
 
 void shiftBuffer(byte msb, byte lsb) {
     //linear buffer shifter for audioBuffer
-    for(int i=0; i<22; i += 2) {
+    for(int i=0; i<BUFFERSIZE-2; i += 2) {
         audioBuffer[i]      =   audioBuffer[i+2];
         audioBuffer[i+1]    =   audioBuffer[i+3];
     }
-    audioBuffer[22]         =   msb;
-    audioBuffer[23]         =   lsb;
+    audioBuffer[BUFFERSIZE-2]         =   msb;
+    audioBuffer[BUFFERSIZE-1]         =   lsb;
 }
